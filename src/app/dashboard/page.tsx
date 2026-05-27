@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import FeedContainer from '@/features/feed/components/FeedContainer';
 import { useAppSelector } from '@/hooks/useAppSelector';
+import { useHasMounted } from '@/hooks/useHasMounted';
 import { Newspaper, Film, Users, Flame } from 'lucide-react';
 
 const STATS = [
@@ -14,6 +15,7 @@ const STATS = [
 ];
 
 export default function DashboardPage() {
+  const mounted = useHasMounted();
   const { selectedCategories } = useAppSelector((state) => state.preferences);
 
   return (
@@ -25,10 +27,13 @@ export default function DashboardPage() {
           className="mb-8"
         >
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Your Feed</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Showing content for:{' '}
-            <span className="text-blue-500">{selectedCategories.join(', ')}</span>
-          </p>
+          {/* Only render persisted state client-side to avoid hydration mismatch */}
+          {mounted && (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Showing content for:{' '}
+              <span className="text-blue-500">{selectedCategories.join(', ')}</span>
+            </p>
+          )}
         </motion.div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

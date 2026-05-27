@@ -4,8 +4,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, TrendingUp, Heart, Settings, Zap, X, Menu } from 'lucide-react';
+import { Home, TrendingUp, Heart, Settings, Zap, X, Menu, Sun, Moon } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { useHasMounted } from '@/hooks/useHasMounted';
 import { cn } from '@/utils';
 
 const navLinks = [
@@ -18,9 +19,17 @@ const navLinks = [
 function NavContent({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
+  const mounted = useHasMounted();
+
+  const isDark = theme === 'dark';
+
+  const handleThemeToggle = () => {
+    setTheme(isDark ? 'light' : 'dark');
+  };
 
   return (
     <div className="flex flex-col h-full py-6 px-4">
+      {/* Logo */}
       <div className="flex items-center gap-2 px-2 mb-8">
         <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
           <Zap size={16} className="text-white" />
@@ -28,6 +37,7 @@ function NavContent({ onClose }: { onClose?: () => void }) {
         <span className="font-bold text-lg text-gray-900 dark:text-white">ContentHub</span>
       </div>
 
+      {/* Nav links */}
       <nav className="flex-1 space-y-1">
         {navLinks.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
@@ -56,14 +66,23 @@ function NavContent({ onClose }: { onClose?: () => void }) {
         })}
       </nav>
 
+      {/* Bottom */}
       <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-800">
-        <button
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-        >
-          <span>{theme === 'dark' ? '☀️' : '🌙'}</span>
-          {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-        </button>
+        {/* Theme toggle — only render after mount so theme value is real */}
+        {mounted ? (
+          <button
+            onClick={handleThemeToggle}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            {isDark
+              ? <Sun size={16} className="text-yellow-400" />
+              : <Moon size={16} className="text-slate-500" />
+            }
+            {isDark ? 'Light Mode' : 'Dark Mode'}
+          </button>
+        ) : (
+          <div className="h-10 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+        )}
 
         <div className="flex items-center gap-3 px-3 py-2">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
@@ -84,10 +103,12 @@ export default function Sidebar() {
 
   return (
     <>
+      {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col w-60 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 h-screen sticky top-0 shrink-0">
         <NavContent />
       </aside>
 
+      {/* Mobile hamburger */}
       <button
         onClick={() => setMobileOpen(true)}
         className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm"
@@ -95,6 +116,7 @@ export default function Sidebar() {
         <Menu size={18} className="text-gray-700 dark:text-gray-300" />
       </button>
 
+      {/* Mobile drawer */}
       <AnimatePresence>
         {mobileOpen && (
           <>
