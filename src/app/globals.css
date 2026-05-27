@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
-/* Makes dark: utility classes work when <html class="dark"> is set by next-themes */
-@variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 * {
   box-sizing: border-box;
