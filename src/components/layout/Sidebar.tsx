@@ -2,11 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, TrendingUp, Heart, Settings, Zap, X, Menu, Sun, Moon } from 'lucide-react';
+import { Home, TrendingUp, Heart, Settings, Zap, X, Menu, Sun, Moon, LogOut } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useHasMounted } from '@/hooks/useHasMounted';
+import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
+import { logout } from '@/features/auth/authSlice';
+import { toast } from 'sonner';
 import { cn } from '@/utils';
 
 const navLinks = [
@@ -17,14 +20,19 @@ const navLinks = [
 ];
 
 function NavContent({ onClose }: { onClose?: () => void }) {
-  const pathname = usePathname();
+  const pathname  = usePathname();
+  const router    = useRouter();
+  const dispatch  = useAppDispatch();
+  const mounted   = useHasMounted();
   const { theme, setTheme } = useTheme();
-  const mounted = useHasMounted();
+  const user = useAppSelector((s) => s.auth.user);
 
   const isDark = theme === 'dark';
 
-  const handleThemeToggle = () => {
-    setTheme(isDark ? 'light' : 'dark');
+  const handleLogout = () => {
+    dispatch(logout());
+    toast.success('Signed out');
+    router.replace('/login');
   };
 
   return (
@@ -67,11 +75,11 @@ function NavContent({ onClose }: { onClose?: () => void }) {
       </nav>
 
       {/* Bottom */}
-      <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-800">
-        {/* Theme toggle — only render after mount so theme value is real */}
+      <div className="space-y-2 pt-4 border-t border-gray-200 dark:border-gray-800">
+        {/* Theme toggle */}
         {mounted ? (
           <button
-            onClick={handleThemeToggle}
+            onClick={() => setTheme(isDark ? 'light' : 'dark')}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
             {isDark
@@ -84,13 +92,25 @@ function NavContent({ onClose }: { onClose?: () => void }) {
           <div className="h-10 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
         )}
 
-        <div className="flex items-center gap-3 px-3 py-2">
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+        >
+          <LogOut size={16} />
+          Sign Out
+        </button>
+
+        {/* User profile */}
+        <div className="flex items-center gap-3 px-3 py-2 mt-1">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-            S
+            {user?.name?.[0] ?? 'U'}
           </div>
-          <div>
-            <p className="text-sm font-medium text-gray-900 dark:text-white">Sahil</p>
-            <p className="text-xs text-gray-400">Developer</p>
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+              {user?.name ?? 'Guest'}
+            </p>
+            <p className="text-xs text-gray-400 truncate">{user?.email ?? ''}</p>
           </div>
         </div>
       </div>
@@ -103,12 +123,10 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col w-60 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 h-screen sticky top-0 shrink-0">
         <NavContent />
       </aside>
 
-      {/* Mobile hamburger */}
       <button
         onClick={() => setMobileOpen(true)}
         className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm"
@@ -116,7 +134,6 @@ export default function Sidebar() {
         <Menu size={18} className="text-gray-700 dark:text-gray-300" />
       </button>
 
-      {/* Mobile drawer */}
       <AnimatePresence>
         {mobileOpen && (
           <>

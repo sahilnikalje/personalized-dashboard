@@ -5,6 +5,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
 import { store, persistor } from '@/store';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -17,7 +18,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           storageKey="contenthub-theme"
           disableTransitionOnChange={false}
         >
-          {children}
+          <ProtectedRoute>
+            {children}
+          </ProtectedRoute>
           <Toaster richColors position="top-right" />
         </ThemeProvider>
       </PersistGate>

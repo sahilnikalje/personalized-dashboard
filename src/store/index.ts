@@ -6,6 +6,7 @@ import searchReducer from '@/features/search/searchSlice';
 import preferencesReducer from '@/features/preferences/preferencesSlice';
 import { newsApi } from '@/services/news/newsApi';
 import { tmdbApi } from '@/services/tmdb/tmdbApi';
+import authReducer from '@/features/auth/authSlice';
 
 const createNoopStorage = () => ({
   getItem: (_key: string) => Promise.resolve(null),
@@ -25,6 +26,7 @@ const persistConfig = {
 };
 
 const rootReducer = combineReducers({
+  auth: authReducer,
   feed: feedReducer,
   favorites: favoritesReducer,
   search: searchReducer,
